@@ -2,5 +2,12 @@ namespace webapiV2.Helpers;
 
 public class AppSettings
 {
-    public string JwtKey { get; set; }
+    //! Helpers klasörü altında JwtUtls.cs ve JwtMiddleware.cs dosyaları silinince JwtKey objeside silinecek.
+    //public string JwtKey { get; set; }= null!;
+
+     public string Secret { get; set; }
+
+    // refresh token time to live (in days), inactive tokens are
+    // automatically deleted from the database after this time
+    public int RefreshTokenTTL { get; set; }
 }

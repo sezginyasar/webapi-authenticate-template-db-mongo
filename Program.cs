@@ -4,12 +4,15 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using webapiV2.Helpers;
+using System.Text.Json.Serialization;
+using webapiV2.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddCors();
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(x => x.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -52,6 +55,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 // global cors policy
 app.UseCors(x => x
+    .SetIsOriginAllowed(origin => true)
     .AllowAnyOrigin()
     .AllowAnyMethod()
     .AllowAnyHeader());
