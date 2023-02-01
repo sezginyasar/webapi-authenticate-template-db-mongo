@@ -111,7 +111,7 @@ public class UserService : IUserService
         removeOldRefreshTokens(user);
 
         // save changes to db
-        var push = Builders<User>.Update.Push("RefreshTokens", user.RefreshTokens);
+        var push = Builders<User>.Update.Set("RefreshTokens", user.RefreshTokens);
         _users.UpdateOne(filter, push);
         // _context.Update(user);
         // _context.SaveChanges();
