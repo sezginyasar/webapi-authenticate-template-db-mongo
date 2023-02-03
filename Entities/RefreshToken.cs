@@ -3,13 +3,17 @@ namespace webapiV2.Entities;
 // using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 //[Owned]
 public class RefreshToken
 {
-    [Key]
-    [JsonIgnore]
-    public int Id { get; set; }
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
+    //! Mongodb olduğu için bunu silmek gerekebilir (Account)
+    //public Account Account { get; set; }
     public string Token { get; set; }
     public DateTime Expires { get; set; }
     public DateTime Created { get; set; }

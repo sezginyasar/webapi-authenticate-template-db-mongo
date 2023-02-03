@@ -1,4 +1,4 @@
-namespace webapiV2.Models.Users;
+namespace webapiV2.Models.Accounts;
 
 public class RevokeTokenRequest
 {

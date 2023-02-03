@@ -13,7 +13,7 @@ using webapiV2.Helpers;
 
 public interface IJwtUtils
 {
-    public string GenerateJwtToken(User user);
+    public string GenerateJwtToken(Account account);
     public string? ValidateJwtToken(string token);
     public RefreshToken GenerateRefreshToken(string ipAddress);
 }
@@ -21,7 +21,7 @@ public interface IJwtUtils
 public class JwtUtils : IJwtUtils
 {
     // private DataContext _context;
-    private readonly IMongoCollection<User> _users;
+    private readonly IMongoCollection<Account> _account;
 
     private readonly AppSettings _appSettings;
 
@@ -30,19 +30,19 @@ public class JwtUtils : IJwtUtils
         var mongoClient = new MongoClient(db.Value.ConnectionString);
         var mongoDatabase = mongoClient.GetDatabase(db.Value.DatabaseName);
 
-        _users = mongoDatabase.GetCollection<User>("Users");
+        _account = mongoDatabase.GetCollection<Account>("Account");
         // _context = context;
         _appSettings = appSettings.Value;
     }
 
-    public string GenerateJwtToken(User user)
+    public string GenerateJwtToken(Account account)
     {
         // generate token that is valid for 15 minutes
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(new[] { new Claim("id", user.Id.ToString()) }),
+            Subject = new ClaimsIdentity(new[] { new Claim("id", account.Id.ToString()) }),
             Expires = DateTime.UtcNow.AddMinutes(15),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
@@ -70,10 +70,10 @@ public class JwtUtils : IJwtUtils
             }, out SecurityToken validatedToken);
 
             var jwtToken = (JwtSecurityToken)validatedToken;
-            var userId = jwtToken.Claims.First(x => x.Type == "id").Value;
+            var accountId = jwtToken.Claims.First(x => x.Type == "id").Value;
 
             // return user id from JWT token if validation successful
-            return userId;
+            return accountId;
         }
         catch
         {
@@ -103,7 +103,7 @@ public class JwtUtils : IJwtUtils
 
 
             //!_context.Users.Any(u => u.RefreshTokens.Any(t => t.Token == token));
-            var tokenIsUnique = _users.Find(x => x.RefreshTokens.Any(t => t.Token == token));
+            var tokenIsUnique = _account.Find(x => x.RefreshTokens.Any(t => t.Token == token));
 
             if (tokenIsUnique == null)
                 return getUniqueToken();
