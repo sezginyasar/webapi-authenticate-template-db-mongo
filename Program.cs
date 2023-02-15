@@ -7,10 +7,24 @@ using webapiV2.Helpers;
 using System.Text.Json.Serialization;
 using webapiV2.Authorization;
 
+//var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddCors();
+builder.Services.AddCors(
+//     options => {
+//     options.AddPolicy(name: MyAllowSpecificOrigins,
+//                     policy => {
+//                         policy.WithOrigins("http://localhost")
+//                         .WithExposedHeaders("x-custom-header")
+//                         .AllowCredentials()
+//                         //.AllowAnyOrigin()
+//                         .AllowAnyHeader()
+//                         .AllowAnyMethod();
+//                     });
+// }
+);
 builder.Services.AddControllers()
     .AddJsonOptions(x => {
         x.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
@@ -19,7 +33,6 @@ builder.Services.AddControllers()
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
 
 // ayar nesneleri kısmı
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
@@ -55,11 +68,15 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 // global cors policy
-app.UseCors(x => x
+app.UseCors(
+    //MyAllowSpecificOrigins
+    x => x
     .SetIsOriginAllowed(origin => true)
-    .AllowAnyOrigin()
+    //.AllowAnyOrigin()
     .AllowAnyMethod()
-    .AllowAnyHeader());
+    .AllowAnyHeader()
+    .AllowCredentials()
+    );
 
 // global error handler
 app.UseMiddleware<ErrorHandlerMiddleware>();
@@ -72,7 +89,7 @@ if (app.Environment.IsDevelopment()) {
 }
 
 app.UseHttpsRedirection();
-
+//app.UseCookiePolicy();
 app.UseAuthorization();
 
 app.MapControllers();

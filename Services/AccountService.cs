@@ -288,11 +288,8 @@ public class AccountService : IAccountService {
         var account=getAccount(id);
         var result=account.RefreshTokens.Any(x=>x.Token==token);
         return result;
-
-
-
-
     }
+    
     private Account getAccount(string id) {
         var account = _accounts.Find(x => x.Id == id).FirstOrDefault();
         if (account == null) throw new KeyNotFoundException("Kullanıcı bulunamadı");

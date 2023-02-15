@@ -14,17 +14,21 @@ using webapiV2.Services;
 [Route("[controller]")]
 public class AccountsController : BaseController {
     private readonly IAccountService _accountService;
+    private readonly ILogger<AccountsController> _logger;
 
-    public AccountsController(IAccountService accountService) {
+    public AccountsController(IAccountService accountService, ILogger<AccountsController> lg) {
         _accountService = accountService;
+        _logger = lg;
     }
 
     [AllowAnonymous]
     [HttpPost("authenticate")]
     public ActionResult<AuthenticateResponse> Authenticate(AuthenticateRequest model) {
+        //_logger.LogInformation
+        Console.WriteLine("Request content type:{0}", Request.ContentType);
         var response = _accountService.Authenticate(model, ipAddress());
         setTokenCookie(response.RefreshToken);
-
+        Console.WriteLine("refresh token cookie", response.RefreshToken);
         return Ok(response);
     }
 
@@ -34,6 +38,7 @@ public class AccountsController : BaseController {
         var refreshToken = Request.Cookies["refreshToken"];
         var response = _accountService.RefreshToken(refreshToken, ipAddress());
         setTokenCookie(response.RefreshToken);
+        Console.WriteLine("refresh token cookie", response.RefreshToken);
         return Ok(response);
     }
 
@@ -50,9 +55,9 @@ public class AccountsController : BaseController {
         // users can revoke their own tokens and admins can revoke any tokens
         // iptal edilen tokenı iptal eden kişi ADMIN rolündeyse herkesinkini iptal edebilir. role USER ise sadece kendisinin token larını iptal edebilir.
         // OwnsToken gelen token bilgisini kendi refresh tokenların arasında varmı diye kontrol ediyor.
-        bool OwnsToken=_accountService.OwnsToken(token, Account.Id); //!Account.OwnsToken(token)
-        
-        if ( !OwnsToken && Account.Role != Role.Admin)
+        bool OwnsToken = _accountService.OwnsToken(token, Account.Id); //!Account.OwnsToken(token)
+
+        if (!OwnsToken && Account.Role != Role.Admin)
             return Unauthorized(new { message = "Unauthorized" });
 
         _accountService.RevokeToken(token, ipAddress());
@@ -160,7 +165,10 @@ public class AccountsController : BaseController {
         // append cookie with refresh token to the http response
         var cookieOptions = new CookieOptions {
             HttpOnly = true,
-            Expires = DateTime.UtcNow.AddDays(5)
+            Expires = DateTime.UtcNow.AddDays(5),
+            Domain="localhost",
+            SameSite = SameSiteMode.Lax,
+            //Secure = false
         };
         Response.Cookies.Append("refreshToken", token, cookieOptions);
     }
